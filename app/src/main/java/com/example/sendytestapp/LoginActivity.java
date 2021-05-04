@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import br.com.sapereaude.maskedEditText.MaskedEditText;
 import land.sendy.pfe_sdk.api.API;
 import land.sendy.pfe_sdk.model.types.ApiCallback;
@@ -20,8 +22,6 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
@@ -43,14 +43,13 @@ public class LoginActivity extends AppCompatActivity {
         button.setOnClickListener(onClickListener);
 
 
-
     }
 
 
     public void Login(View view) {
 
         MaskedEditText telephoneNumber = findViewById(R.id.phone_input);
-        String phone = removeSpace(telephoneNumber.getText().toString());
+        String phone = removeSpace(Objects.requireNonNull(telephoneNumber.getText()).toString());
         if (phone.length() < 11) {
             Toast.makeText(getApplicationContext(),
                     "Проверьте правильность ввода телефона",
@@ -62,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
             API.outLog("Тест: WS. Попытка старта активации кошелька: " + phone);
-            api.loginAtAuth(getApplicationContext(), phone, new ApiCallback() {
+            LoaderError runResult = api.loginAtAuth(this, phone, new ApiCallback() {
                 @Override
                 public void onCompleted(boolean res) {
                     if (!res || getErrNo() != 0) {
@@ -74,6 +73,10 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
             });
+            if (runResult != null && runResult.hasError()) {
+                API.outLog("runResult запрос не был запущен:\r\n" +
+                        runResult.toString());
+            }
         }
     }
 
